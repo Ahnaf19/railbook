@@ -10,7 +10,8 @@
     { "key": "refreshToken", "value": "" },
     { "key": "bookingId", "value": "" },
     { "key": "scheduleId", "value": "" },
-    { "key": "seatId", "value": "" }
+    { "key": "seatId", "value": "" },
+    { "key": "trainId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -132,7 +133,22 @@
             "method": "GET",
             "url": "{{baseUrl}}/trains",
             "auth": { "type": "noauth" }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var json = pm.response.json();",
+                  "  if (json.length > 0) {",
+                  "    pm.collectionVariables.set('trainId', json[0].id);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Schedules",
