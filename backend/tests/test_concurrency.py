@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.main import app
 from app.models import Compartment, Schedule, Seat
+from app.ratelimit.dependencies import rate_limit_auth, rate_limit_booking, rate_limit_payment
 from tests.conftest import TestSession
 
 
@@ -27,6 +28,9 @@ async def _make_client():
             yield session
 
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[rate_limit_auth] = lambda: None
+    app.dependency_overrides[rate_limit_booking] = lambda: None
+    app.dependency_overrides[rate_limit_payment] = lambda: None
     transport = ASGITransport(app=app)
     return AsyncClient(transport=transport, base_url="http://test")
 

@@ -8,6 +8,7 @@ from app.config import settings
 from app.database import get_db
 from app.main import app
 from app.models import Base
+from app.ratelimit.dependencies import rate_limit_auth, rate_limit_booking, rate_limit_payment
 from app.seed import seed_database
 
 _base, _ = settings.DATABASE_URL.rsplit("/", 1)
@@ -60,6 +61,10 @@ async def client(session_factory):
             yield session
 
     app.dependency_overrides[get_db] = override_get_db
+    # Disable rate limiting in tests by default
+    app.dependency_overrides[rate_limit_auth] = lambda: None
+    app.dependency_overrides[rate_limit_booking] = lambda: None
+    app.dependency_overrides[rate_limit_payment] = lambda: None
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
         yield c
