@@ -1,0 +1,2 @@
+locust>=2.20
+psycopg2-binary>=2.9
