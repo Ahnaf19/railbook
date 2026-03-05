@@ -8,6 +8,7 @@ from sqlalchemy import text
 from app.auth.router import router as auth_router
 from app.database import async_session, engine
 from app.seed import seed_database
+from app.trains.router import router as trains_router
 
 
 @asynccontextmanager
@@ -40,6 +41,7 @@ app.add_middleware(
 
 
 app.include_router(auth_router)
+app.include_router(trains_router)
 
 
 @app.get("/health")
