@@ -15,27 +15,23 @@ router = APIRouter(prefix="/trains", tags=["trains"])
 
 
 def _get_redis():
-    """Get Redis connection or None if unavailable."""
+    """Get Redis connection from pool, or None if unavailable."""
     try:
-        from redis.asyncio import Redis
+        from app.redis import get_redis
 
-        from app.config import settings
-
-        return Redis.from_url(settings.REDIS_URL, decode_responses=True)
+        return get_redis()
     except Exception:
         return None
 
 
 @router.get("", response_model=list[TrainResponse])
 async def get_trains(session: AsyncSession = Depends(get_db)):
-    trains = await list_trains(session)
-    return trains
+    return await list_trains(session)
 
 
 @router.get("/{train_id}/schedules", response_model=list[ScheduleResponse])
 async def get_schedules(train_id: uuid.UUID, session: AsyncSession = Depends(get_db)):
-    schedules = await list_schedules(session, train_id)
-    return schedules
+    return await list_schedules(session, train_id)
 
 
 @router.get(

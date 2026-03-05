@@ -33,6 +33,12 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     cleanup_task.cancel()
+    try:
+        from app.redis import close_redis_pool
+
+        await close_redis_pool()
+    except Exception:
+        pass
     await engine.dispose()
     logger.info("Database engine disposed")
 

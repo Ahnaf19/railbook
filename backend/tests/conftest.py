@@ -13,6 +13,10 @@ from app.seed import seed_database
 _base, _ = settings.DATABASE_URL.rsplit("/", 1)
 TEST_DB_URL = f"{_base}/railbook_test"
 
+# Module-level engine and session factory (reusable in tests that need direct access)
+_engine = create_async_engine(TEST_DB_URL, echo=False)
+TestSession = async_sessionmaker(_engine, class_=AsyncSession, expire_on_commit=False)
+
 
 @pytest.fixture(scope="session")
 def anyio_backend():
@@ -21,7 +25,7 @@ def anyio_backend():
 
 @pytest.fixture(scope="session")
 async def test_engine():
-    engine = create_async_engine(TEST_DB_URL, echo=False)
+    engine = _engine
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)

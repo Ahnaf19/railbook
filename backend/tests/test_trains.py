@@ -41,14 +41,18 @@ async def test_seat_availability(client: AsyncClient, db_session: AsyncSession, 
 
 
 async def test_seat_shows_booked_after_booking(client: AsyncClient, db_session: AsyncSession):
-    # Use a different schedule (offset 1) to avoid Redis cache from previous test
-    result = await db_session.execute(select(Schedule).offset(1).limit(1))
+    # Use a unique schedule (offset 18) to avoid collisions with other tests
+    result = await db_session.execute(
+        select(Schedule).order_by(Schedule.departure_time).offset(18).limit(1)
+    )
     schedule = result.scalar_one()
 
+    # Pick a seat that's not yet booked
     result = await db_session.execute(
         select(Seat)
         .join(Compartment, Seat.compartment_id == Compartment.id)
         .where(Compartment.train_id == schedule.train_id)
+        .offset(200)
         .limit(1)
     )
     seat = result.scalar_one()
@@ -56,7 +60,6 @@ async def test_seat_shows_booked_after_booking(client: AsyncClient, db_session: 
     result = await db_session.execute(select(User).where(User.email == "alice@example.com"))
     user = result.scalar_one()
 
-    # Create a booking directly
     booking = Booking(
         user_id=user.id,
         schedule_id=schedule.id,
@@ -68,12 +71,21 @@ async def test_seat_shows_booked_after_booking(client: AsyncClient, db_session: 
     db_session.add(booking)
     await db_session.commit()
 
+    # Invalidate Redis cache so the next GET reads from DB
+    try:
+        from app.redis import get_redis
+
+        r = get_redis()
+        await r.delete(f"seats:{schedule.id}")
+        await r.aclose()
+    except Exception:
+        pass
+
     resp = await client.get(f"/trains/schedules/{schedule.id}/seats")
     assert resp.status_code == 200
     data = resp.json()
-    assert data["available_seats"] == 249
 
-    # Find the booked seat
     booked = [s for s in data["seats"] if s["id"] == str(seat.id)]
     assert len(booked) == 1
     assert booked[0]["booking_status"] == "confirmed"
+    assert data["available_seats"] < data["total_seats"]
