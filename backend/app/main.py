@@ -5,7 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from sqlalchemy import text
 
-from app.database import engine
+from app.database import async_session, engine
+from app.seed import seed_database
 
 
 @asynccontextmanager
@@ -14,6 +15,12 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.execute(text("SELECT 1"))
     logger.info("Database connection verified")
+
+    # Seed data
+    async with async_session() as session:
+        await seed_database(session)
+    logger.info("Seed data loaded")
+
     yield
     # Shutdown: dispose engine
     await engine.dispose()
