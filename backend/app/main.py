@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -6,6 +7,8 @@ from loguru import logger
 from sqlalchemy import text
 
 from app.auth.router import router as auth_router
+from app.bookings.cleanup import cleanup_expired_reservations
+from app.bookings.router import router as bookings_router
 from app.database import async_session, engine
 from app.seed import seed_database
 from app.trains.router import router as trains_router
@@ -23,8 +26,13 @@ async def lifespan(app: FastAPI):
         await seed_database(session)
     logger.info("Seed data loaded")
 
+    # Start background cleanup task
+    cleanup_task = asyncio.create_task(cleanup_expired_reservations(async_session))
+
     yield
-    # Shutdown: dispose engine
+
+    # Shutdown
+    cleanup_task.cancel()
     await engine.dispose()
     logger.info("Database engine disposed")
 
@@ -42,6 +50,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(trains_router)
+app.include_router(bookings_router)
 
 
 @app.get("/health")
