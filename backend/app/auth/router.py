@@ -22,11 +22,17 @@ from app.auth.service import (
 )
 from app.database import get_db
 from app.models import User
+from app.ratelimit.dependencies import rate_limit_auth
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=TokenResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit_auth)],
+)
 async def register(request: RegisterRequest, session: AsyncSession = Depends(get_db)):
     try:
         user = await register_user(
@@ -42,7 +48,7 @@ async def register(request: RegisterRequest, session: AsyncSession = Depends(get
     )
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse, dependencies=[Depends(rate_limit_auth)])
 async def login(request: LoginRequest, session: AsyncSession = Depends(get_db)):
     user = await authenticate_user(session, request.email, request.password)
     if not user:
@@ -53,7 +59,7 @@ async def login(request: LoginRequest, session: AsyncSession = Depends(get_db)):
     )
 
 
-@router.post("/refresh", response_model=TokenResponse)
+@router.post("/refresh", response_model=TokenResponse, dependencies=[Depends(rate_limit_auth)])
 async def refresh(request: RefreshRequest, session: AsyncSession = Depends(get_db)):
     try:
         payload = decode_token(request.refresh_token)

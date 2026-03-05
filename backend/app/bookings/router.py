@@ -18,11 +18,14 @@ from app.bookings.service import (
 )
 from app.database import get_db
 from app.models import User
+from app.ratelimit.dependencies import rate_limit_booking, rate_limit_payment
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
 
-@router.post("", response_model=BookingResponse, status_code=201)
+@router.post(
+    "", response_model=BookingResponse, status_code=201, dependencies=[Depends(rate_limit_booking)]
+)
 async def create(
     request: CreateBookingRequest,
     raw_request: Request,
@@ -40,7 +43,9 @@ async def create(
     return booking
 
 
-@router.post("/{booking_id}/pay", response_model=BookingResponse)
+@router.post(
+    "/{booking_id}/pay", response_model=BookingResponse, dependencies=[Depends(rate_limit_payment)]
+)
 async def pay(
     booking_id: uuid.UUID,
     request: PayBookingRequest,
@@ -78,7 +83,11 @@ async def get(
     return booking
 
 
-@router.post("/{booking_id}/refund", response_model=BookingResponse)
+@router.post(
+    "/{booking_id}/refund",
+    response_model=BookingResponse,
+    dependencies=[Depends(rate_limit_payment)],
+)
 async def refund(
     booking_id: uuid.UUID,
     raw_request: Request,
