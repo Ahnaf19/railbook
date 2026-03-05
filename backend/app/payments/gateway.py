@@ -29,9 +29,7 @@ class MockPaymentGateway:
         if idempotency_key in self._processed:
             return self._processed[idempotency_key]
         if random.random() < self.failure_rate:
-            result = PaymentResult(
-                status="failed", failure_reason="Card declined (simulated)"
-            )
+            result = PaymentResult(status="failed", failure_reason="Card declined (simulated)")
         else:
             result = PaymentResult(status="success", gateway_ref=f"MOCK-{uuid4().hex[:8]}")
         self._processed[idempotency_key] = result
