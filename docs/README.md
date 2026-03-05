@@ -18,7 +18,9 @@ This directory contains all project documentation for RailBook. Each subdirector
 ### Guides
 
 - **[Developer Guide](guides/DEVELOPER_GUIDE.md)** -- Setup instructions, local development workflow, project conventions, and how to add new features.
+- **[User Guide](guides/USER_GUIDE.md)** -- End-user walkthrough of the application, from account creation to booking and refunds.
 - **[Deployment Guide](guides/DEPLOYMENT_GUIDE.md)** -- Docker Compose deployment, environment variable configuration, and production hardening recommendations.
+- **[Load Testing Guide](guides/LOAD_TESTING_GUIDE.md)** -- Locust personas, running load tests, and verifying database integrity after a run.
 
 ### Postman
 
