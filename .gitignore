@@ -43,5 +43,8 @@ frontend/dist/
 # Claude Code (local settings are user-specific)
 .claude/settings.local.json
 
+# Private notes (interview prep, personal walkthrough)
+private/
+
 # Misc
 *.log
