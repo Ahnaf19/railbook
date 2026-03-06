@@ -11,6 +11,7 @@ from app.bookings.schemas import (
 )
 from app.bookings.service import (
     create_booking,
+    enrich_booking,
     get_booking,
     list_user_bookings,
     pay_booking,
@@ -40,7 +41,7 @@ async def create(
         request.idempotency_key,
         ip_address=raw_request.client.host if raw_request.client else None,
     )
-    return booking
+    return await enrich_booking(session, booking)
 
 
 @router.post(
@@ -60,7 +61,7 @@ async def pay(
         request.idempotency_key,
         ip_address=raw_request.client.host if raw_request.client else None,
     )
-    return booking
+    return await enrich_booking(session, booking)
 
 
 @router.get("", response_model=list[BookingResponse])
@@ -70,7 +71,7 @@ async def list_bookings(
     user: User = Depends(get_current_user),
 ):
     bookings = await list_user_bookings(session, user.id, status)
-    return bookings
+    return [await enrich_booking(session, b) for b in bookings]
 
 
 @router.get("/{booking_id}", response_model=BookingResponse)
@@ -80,7 +81,7 @@ async def get(
     user: User = Depends(get_current_user),
 ):
     booking = await get_booking(session, booking_id)
-    return booking
+    return await enrich_booking(session, booking)
 
 
 @router.post(
@@ -100,4 +101,4 @@ async def refund(
         user.id,
         ip_address=raw_request.client.host if raw_request.client else None,
     )
-    return booking
+    return await enrich_booking(session, booking)

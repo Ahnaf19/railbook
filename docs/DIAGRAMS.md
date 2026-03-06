@@ -139,9 +139,9 @@ erDiagram
     compartments {
         uuid id PK
         uuid train_id FK
-        string name "A-E"
+        string name "A-B"
         string comp_type "ac | non_ac"
-        int capacity "50"
+        int capacity "25"
     }
 
     seats {

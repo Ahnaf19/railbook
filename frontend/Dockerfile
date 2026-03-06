@@ -1,11 +1,17 @@
-FROM node:20-alpine AS build
+# ---- Dev stage (used by docker-compose for hot reload) ----
+FROM node:20-alpine AS dev
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
 COPY . .
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+# ---- Production build ----
+FROM dev AS build
 RUN npm run build
 
-FROM nginx:alpine
+FROM nginx:alpine AS prod
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80

@@ -8,7 +8,7 @@ from app.models import Compartment, Schedule, Seat
 from app.payments.gateway import payment_gateway
 
 
-async def _book_and_pay(client, auth_headers, db_session, schedule_offset=8, seat_offset=130):
+async def _book_and_pay(client, auth_headers, db_session, schedule_offset=8, seat_offset=30):
     result = await db_session.execute(
         select(Schedule).order_by(Schedule.departure_time).offset(schedule_offset).limit(1)
     )
@@ -50,7 +50,7 @@ async def _book_and_pay(client, auth_headers, db_session, schedule_offset=8, sea
 async def test_successful_refund(client: AsyncClient, auth_headers: dict, db_session: AsyncSession):
     payment_gateway.latency_ms = 10
     booking = await _book_and_pay(
-        client, auth_headers, db_session, schedule_offset=8, seat_offset=130
+        client, auth_headers, db_session, schedule_offset=8, seat_offset=30
     )
     assert booking["status"] == "confirmed"
 
@@ -71,7 +71,7 @@ async def test_refund_non_confirmed_fails(
         select(Seat)
         .join(Compartment, Seat.compartment_id == Compartment.id)
         .where(Compartment.train_id == schedule.train_id)
-        .offset(131)
+        .offset(31)
         .limit(1)
     )
     seat = result.scalar_one()

@@ -62,6 +62,24 @@ export default function Booking() {
       <h2>Booking Details</h2>
       <ErrorAlert message={error} onDismiss={() => setError("")} />
       <div className="booking-card">
+        {booking.train_name && (
+          <div className="booking-card__row">
+            <span className="label">Train</span>
+            <strong>{booking.train_name} ({booking.train_number})</strong>
+          </div>
+        )}
+        {booking.origin && (
+          <div className="booking-card__row">
+            <span className="label">Route</span>
+            <span>{booking.origin} &rarr; {booking.destination}</span>
+          </div>
+        )}
+        {booking.compartment_name && (
+          <div className="booking-card__row">
+            <span className="label">Seat</span>
+            <span>{booking.compartment_name} ({booking.comp_type === "ac" ? "AC" : "Non-AC"}) &middot; Seat {booking.seat_number}</span>
+          </div>
+        )}
         <div className="booking-card__row">
           <span className="label">Status</span>
           <StatusBadge status={booking.status} />

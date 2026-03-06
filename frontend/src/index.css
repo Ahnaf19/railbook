@@ -319,7 +319,7 @@ body {
 
 .seat-grid__seats {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 4px;
 }
 
@@ -456,7 +456,21 @@ body {
   font-weight: 600;
 }
 
-.ticket-card__id {
+.ticket-card__train {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.ticket-card__route {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.ticket-card__details {
+  display: flex;
+  gap: 1rem;
   font-size: 0.8rem;
   color: var(--text-muted);
   font-family: var(--mono);

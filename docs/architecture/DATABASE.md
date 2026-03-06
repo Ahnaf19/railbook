@@ -101,12 +101,12 @@ Physical sections of a train. Each compartment has a type (AC or non-AC) that de
 | `train_id`  | `UUID`         | FK -> `trains.id`, NOT NULL     | Parent train                   |
 | `name`      | `VARCHAR(10)`  | NOT NULL                        | Label (e.g., "A", "B", "C")  |
 | `comp_type` | `VARCHAR(20)`  | NOT NULL                        | `'ac'` or `'non_ac'`          |
-| `capacity`  | `INTEGER`      | default `50`                    | Number of seats                |
+| `capacity`  | `INTEGER`      | default `25`                    | Number of seats                |
 
 **Indexes:**
 - PK index on `id`
 
-**Notes:** Pricing is derived from `comp_type`: AC compartments are 1500.00 BDT, non-AC are 800.00 BDT. The seed data creates 5 compartments per train (A, B = AC; C, D, E = non-AC), each with 50 seats.
+**Notes:** Pricing is derived from `comp_type`: AC compartments are 1500.00 BDT, non-AC are 800.00 BDT. The seed data creates 2 compartments per train (A = AC; B = non-AC), each with 25 seats.
 
 ---
 
@@ -118,7 +118,7 @@ Individual seats within a compartment.
 |------------------|----------------|------------------------------------------|--------------------------------|
 | `id`             | `UUID`         | PK, default `uuid4()`                   | Seat identifier                |
 | `compartment_id` | `UUID`         | FK -> `compartments.id`, NOT NULL        | Parent compartment             |
-| `seat_number`    | `INTEGER`      | NOT NULL                                 | Number within compartment (1-50) |
+| `seat_number`    | `INTEGER`      | NOT NULL                                 | Number within compartment (1-25) |
 | `position`       | `VARCHAR(20)`  | NOT NULL                                 | `'window'` or `'corridor'`    |
 
 **Constraints:**
@@ -128,7 +128,7 @@ Individual seats within a compartment.
 - PK index on `id`
 - Unique composite index on `(compartment_id, seat_number)`
 
-**Notes:** Seat position is determined by the last digit of the seat number: digits 1, 4, 5, 8 are window seats; all others are corridor. The seed creates 750 seats total (3 trains x 5 compartments x 50 seats).
+**Notes:** Seat position is determined by the last digit of the seat number: digits 1, 4, 5, 8 are window seats; all others are corridor. The seed creates 150 seats total (3 trains x 2 compartments x 25 seats).
 
 ---
 
@@ -319,8 +319,8 @@ The `seed_database()` function populates the database on first startup:
 |--------------|--------|------------------------------------------------------|
 | Users        | 4      | 1 admin, 2 demo users (Alice, Bob), 1 system user   |
 | Trains       | 3      | Subarna Express, Ekota Express, Mohanagar Provati    |
-| Compartments | 15     | 5 per train (A, B = AC; C, D, E = non-AC)           |
-| Seats        | 750    | 50 per compartment                                   |
+| Compartments | 6      | 2 per train (A = AC; B = non-AC)                     |
+| Seats        | 150    | 25 per compartment                                   |
 | Schedules    | 21     | 7 days x 3 trains                                    |
 
-Total rows at startup: ~793. The seed is idempotent -- it checks for existing data and skips if any train rows exist.
+Total rows at startup: ~184. The seed is idempotent -- it checks for existing data and skips if any train rows exist.

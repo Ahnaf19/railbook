@@ -18,7 +18,7 @@ src/
   components/
     Layout.jsx              → Nav bar + <Outlet />, shows user name, logout button
     ProtectedRoute.jsx      → Redirects to /login if not authenticated
-    SeatGrid.jsx            → Renders 5 compartments × 50 seats, handles selection callback
+    SeatGrid.jsx            → Renders 2 compartments × 25 seats, handles selection callback
     SeatCell.jsx            → Individual seat (color by status: green/red/yellow/blue)
     StatusBadge.jsx         → Booking status pill (reserved/confirmed/cancelled/refunded)
     ErrorAlert.jsx          → Red error banner, auto-dismiss
@@ -61,7 +61,7 @@ src/
 - `logout()` → clears state + localStorage
 
 ### Seat Grid (SeatGrid.jsx)
-- Groups seats by compartment (A-E)
+- Groups seats by compartment (A-B)
 - Color coding: green=#22c55e (available), red=#ef4444 (booked), yellow=#eab308 (reserved), blue=#3b82f6 (selected)
 - `onSelect` callback fires with seat object when clicking available seat
 - Compartment headers show type (AC/Non-AC) and price

@@ -27,5 +27,15 @@ class BookingResponse(BaseModel):
     confirmed_at: datetime | None
     cancelled_at: datetime | None
     idempotency_key: uuid.UUID
+    # Train and seat details
+    train_name: str | None = None
+    train_number: str | None = None
+    origin: str | None = None
+    destination: str | None = None
+    compartment_name: str | None = None
+    comp_type: str | None = None
+    seat_number: int | None = None
+    departure_time: datetime | None = None
+    arrival_time: datetime | None = None
 
     model_config = {"from_attributes": True}

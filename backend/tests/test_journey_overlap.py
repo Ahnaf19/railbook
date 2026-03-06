@@ -21,7 +21,7 @@ async def test_overlapping_journey_blocked(
         select(Seat)
         .join(Compartment, Seat.compartment_id == Compartment.id)
         .where(Compartment.train_id == schedule.train_id)
-        .offset(110)
+        .offset(15)
         .limit(2)
     )
     seats = result.scalars().all()

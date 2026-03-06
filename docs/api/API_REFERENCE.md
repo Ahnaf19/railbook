@@ -330,8 +330,8 @@ curl http://localhost:8000/trains/schedules/d4e5f6a7-b8c9-0123-defa-234567890123
 {
   "schedule_id": "d4e5f6a7-b8c9-0123-defa-234567890123",
   "train_name": "Subarna Express",
-  "total_seats": 250,
-  "available_seats": 248,
+  "total_seats": 50,
+  "available_seats": 48,
   "seats": [
     {
       "id": "e5f6a7b8-c9d0-1234-efab-345678901234",
@@ -353,7 +353,7 @@ curl http://localhost:8000/trains/schedules/d4e5f6a7-b8c9-0123-defa-234567890123
 }
 ```
 
-Each train has 5 compartments (A-E) with 50 seats each (250 total). Compartments A and B are `ac` type; C, D, and E are `non_ac` type. Seat positions alternate between `window` and `corridor`. The `booking_status` field is `null` for available seats, or one of `reserved`, `confirmed`, `refunded`, or `cancelled`.
+Each train has 2 compartments (A-B) with 25 seats each (50 total). Compartment A is `ac` type; B is `non_ac` type. Seat positions alternate between `window` and `corridor`. The `booking_status` field is `null` for available seats, or one of `reserved`, `confirmed`, `refunded`, or `cancelled`.
 
 **Error responses:**
 
@@ -385,7 +385,7 @@ Create a new seat reservation. The reservation expires after 5 minutes if not pa
 
 The `idempotency_key` ensures that retrying the same request returns the original booking rather than creating a duplicate. Clients should generate a UUID v4 and reuse it across retries.
 
-**Pricing:** AC compartments (A, B) cost 1500.00. Non-AC compartments (C, D, E) cost 800.00.
+**Pricing:** AC compartment (A) costs 1500.00. Non-AC compartment (B) costs 800.00.
 
 **curl:**
 
@@ -414,7 +414,16 @@ curl -X POST http://localhost:8000/bookings \
   "expires_at": "2025-01-15T14:35:00+00:00",
   "confirmed_at": null,
   "cancelled_at": null,
-  "idempotency_key": "11111111-2222-3333-4444-555555555555"
+  "idempotency_key": "11111111-2222-3333-4444-555555555555",
+  "train_name": "Subarna Express",
+  "train_number": "SE-701",
+  "origin": "Dhaka",
+  "destination": "Chittagong",
+  "compartment_name": "A",
+  "comp_type": "ac",
+  "seat_number": 1,
+  "departure_time": "2025-01-16T07:00:00+00:00",
+  "arrival_time": "2025-01-16T12:00:00+00:00"
 }
 ```
 
@@ -476,7 +485,16 @@ curl -X POST http://localhost:8000/bookings/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
   "expires_at": "2025-01-15T14:35:00+00:00",
   "confirmed_at": "2025-01-15T14:31:00+00:00",
   "cancelled_at": null,
-  "idempotency_key": "11111111-2222-3333-4444-555555555555"
+  "idempotency_key": "11111111-2222-3333-4444-555555555555",
+  "train_name": "Subarna Express",
+  "train_number": "SE-701",
+  "origin": "Dhaka",
+  "destination": "Chittagong",
+  "compartment_name": "A",
+  "comp_type": "ac",
+  "seat_number": 1,
+  "departure_time": "2025-01-16T07:00:00+00:00",
+  "arrival_time": "2025-01-16T12:00:00+00:00"
 }
 ```
 
@@ -533,7 +551,16 @@ curl "http://localhost:8000/bookings?status=confirmed" \
     "expires_at": "2025-01-15T14:35:00+00:00",
     "confirmed_at": "2025-01-15T14:31:00+00:00",
     "cancelled_at": null,
-    "idempotency_key": "11111111-2222-3333-4444-555555555555"
+    "idempotency_key": "11111111-2222-3333-4444-555555555555",
+    "train_name": "Subarna Express",
+    "train_number": "SE-701",
+    "origin": "Dhaka",
+    "destination": "Chittagong",
+    "compartment_name": "A",
+    "comp_type": "ac",
+    "seat_number": 1,
+    "departure_time": "2025-01-16T07:00:00+00:00",
+    "arrival_time": "2025-01-16T12:00:00+00:00"
   }
 ]
 ```
@@ -604,7 +631,16 @@ curl -X POST http://localhost:8000/bookings/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
   "expires_at": "2025-01-15T14:35:00+00:00",
   "confirmed_at": "2025-01-15T14:31:00+00:00",
   "cancelled_at": "2025-01-15T15:00:00+00:00",
-  "idempotency_key": "11111111-2222-3333-4444-555555555555"
+  "idempotency_key": "11111111-2222-3333-4444-555555555555",
+  "train_name": "Subarna Express",
+  "train_number": "SE-701",
+  "origin": "Dhaka",
+  "destination": "Chittagong",
+  "compartment_name": "A",
+  "comp_type": "ac",
+  "seat_number": 1,
+  "departure_time": "2025-01-16T07:00:00+00:00",
+  "arrival_time": "2025-01-16T12:00:00+00:00"
 }
 ```
 
@@ -700,7 +736,7 @@ Results are ordered by `reserved_at` descending. Note that the admin bookings re
 
 ### `GET /admin/occupancy`
 
-Get occupancy rates per schedule. Each entry shows the number of booked seats (reserved or confirmed) out of the total capacity (250 seats per train).
+Get occupancy rates per schedule. Each entry shows the number of booked seats (reserved or confirmed) out of the total capacity (50 seats per train).
 
 **Auth required:** Yes (admin only)
 
@@ -720,8 +756,8 @@ curl http://localhost:8000/admin/occupancy \
     "departure_time": "2025-01-16T07:00:00+00:00",
     "train_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "booked_seats": 12,
-    "total_seats": 250,
-    "occupancy_pct": 4.8
+    "total_seats": 50,
+    "occupancy_pct": 24.0
   }
 ]
 ```

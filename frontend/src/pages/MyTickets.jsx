@@ -29,6 +29,16 @@ export default function MyTickets() {
     }
   };
 
+  const formatDate = (iso) => {
+    if (!iso) return "";
+    return new Date(iso).toLocaleString([], {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <div className="tickets-page">
       <h2>My Tickets</h2>
@@ -43,7 +53,24 @@ export default function MyTickets() {
                 &#2547; {b.total_amount}
               </span>
             </div>
-            <div className="ticket-card__id">Booking: {b.id.slice(0, 8)}...</div>
+            {b.train_name && (
+              <div className="ticket-card__train">
+                <strong>{b.train_name}</strong>
+                <span className="ticket-card__route">
+                  {b.origin} &rarr; {b.destination}
+                </span>
+              </div>
+            )}
+            <div className="ticket-card__details">
+              {b.departure_time && (
+                <span>{formatDate(b.departure_time)}</span>
+              )}
+              {b.compartment_name && (
+                <span>
+                  {b.compartment_name} ({b.comp_type === "ac" ? "AC" : "Non-AC"}) &middot; Seat {b.seat_number}
+                </span>
+              )}
+            </div>
             <div className="ticket-card__actions">
               {b.status === "reserved" && (
                 <Link to={`/booking/${b.id}`} className="btn btn--primary btn--sm">

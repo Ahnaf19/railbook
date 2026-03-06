@@ -181,7 +181,7 @@ The system uses 7 SQLAlchemy ORM models:
 | `User`        | `users`         | User accounts with email, password hash, role      |
 | `Train`       | `trains`        | Train definitions (name, number, origin, dest)     |
 | `Schedule`    | `schedules`     | Departure/arrival times per train (unique per train+time) |
-| `Compartment` | `compartments`  | Train compartments (A-E, ac or non_ac, 50 seats)  |
+| `Compartment` | `compartments`  | Train compartments (A-B, ac or non_ac, 25 seats)  |
 | `Seat`        | `seats`         | Individual seats (number, position: window/corridor)|
 | `Booking`     | `bookings`      | Seat reservations with status lifecycle            |
 | `Payment`     | `payments`      | Payment records linked to bookings                 |
@@ -233,7 +233,7 @@ The seed function (`app/seed.py`) runs automatically on application startup and 
 | Ekota Express     | EE-501 | Dhaka - Rajshahi   |
 | Mohanagar Provati | MP-301 | Dhaka - Sylhet     |
 
-Each train has 5 compartments (A-E) with 50 seats each (250 seats total). Compartments A and B are AC (1500.00 per seat), C-E are non-AC (800.00 per seat).
+Each train has 2 compartments (A-B) with 25 seats each (50 seats total). Compartment A is AC (1500.00 per seat), B is non-AC (800.00 per seat).
 
 Schedules are created for the next 7 days from the current date.
 

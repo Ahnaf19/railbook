@@ -44,7 +44,7 @@ async def get_occupancy(session: AsyncSession) -> list[dict]:
         .order_by(Schedule.departure_time)
     )
     rows = result.all()
-    total_seats = 250  # 5 compartments x 50 seats
+    total_seats = 50  # 2 compartments x 25 seats
 
     return [
         {

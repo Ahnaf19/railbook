@@ -94,7 +94,7 @@ Click **Select Seat** on any schedule card to open the seat map at `/seats/:sche
 ### Header Information
 
 - The title "Select Your Seat"
-- An availability counter showing available seats vs total seats (e.g., "Available: 237/250")
+- An availability counter showing available seats vs total seats (e.g., "Available: 48/50")
 
 ### Color Legend
 
@@ -109,12 +109,12 @@ The seat map uses a four-color system to indicate seat status:
 
 ### Compartment Layout
 
-Seats are organized by compartment. Each train has 5 compartments (A through E):
+Seats are organized by compartment. Each train has 2 compartments (A and B):
 
-- **Compartments A and B** are **AC** (air-conditioned) -- 1500 BDT per seat
-- **Compartments C, D, and E** are **Non-AC** -- 800 BDT per seat
+- **Compartment A** is **AC** (air-conditioned) -- 1500 BDT per seat
+- **Compartment B** is **Non-AC** -- 800 BDT per seat
 
-Each compartment has 50 seats, giving a total of 250 seats per train. Seat positions alternate between **window** and **corridor** based on seat number (digits ending in 1, 4, 5, or 8 are window seats).
+Each compartment has 25 seats, giving a total of 50 seats per train. Seat positions alternate between **window** and **corridor** based on seat number (digits ending in 1, 4, 5, or 8 are window seats).
 
 The compartment name and type (AC or Non-AC) are displayed above each seat group.
 
@@ -213,8 +213,8 @@ Ticket prices are determined by the compartment type:
 
 | Compartment Type | Compartments | Price per Seat |
 |------------------|--------------|----------------|
-| AC               | A, B         | 1,500 BDT      |
-| Non-AC           | C, D, E      | 800 BDT        |
+| AC               | A            | 1,500 BDT      |
+| Non-AC           | B            | 800 BDT        |
 
 Prices are fixed and calculated automatically when a booking is created. The amount is displayed on the booking details page and the My Tickets list. The currency is Bangladeshi Taka (BDT), shown with the Taka symbol.
 

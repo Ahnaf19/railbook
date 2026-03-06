@@ -31,7 +31,7 @@ RailBook is a full-stack ticket booking system that deliberately confronts these
 - **Atomic audit trail** — every state change (reserve, pay, cancel, refund, expire) logged in the same transaction
 - **Sliding window rate limiting** — Redis sorted sets enforce per-user throttling with graceful degradation
 - **Split-screen concurrency demo** — watch two users race for the same seat in real time
-- **Visual seat map** — color-coded grid across 5 compartments (AC/Non-AC), 250 seats per train
+- **Visual seat map** — color-coded grid across 2 compartments (AC/Non-AC), 50 seats per train
 
 ---
 
@@ -357,7 +357,7 @@ railbook/
 │   │   ├── config.py            # Environment configuration
 │   │   ├── database.py          # Async engine + session factory
 │   │   ├── models.py            # 8 SQLAlchemy ORM models
-│   │   ├── seed.py              # Seed data (3 trains, 750 seats, demo users)
+│   │   ├── seed.py              # Seed data (3 trains, 150 seats, demo users)
 │   │   ├── auth/                # JWT authentication (register, login, refresh)
 │   │   ├── trains/              # Train listing, schedules, seat availability
 │   │   ├── bookings/            # Core booking engine + cleanup task

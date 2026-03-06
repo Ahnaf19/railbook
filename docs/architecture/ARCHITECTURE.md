@@ -180,7 +180,7 @@ backend/app/
   database.py          AsyncEngine, async_sessionmaker, get_db dependency
   models.py            8 SQLAlchemy models (User through AuditTrail)
   redis.py             Redis connection pool, get_redis(), close_redis_pool()
-  seed.py              Idempotent seed: 3 trains, 5 compartments each, 50 seats each, 7 days of schedules
+  seed.py              Idempotent seed: 3 trains, 2 compartments each, 25 seats each, 7 days of schedules
 
   auth/
     router.py          POST /auth/register, /login, /refresh, GET /auth/me

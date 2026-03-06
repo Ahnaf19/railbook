@@ -69,7 +69,7 @@ class Compartment(Base):
     train_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("trains.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(10), nullable=False)
     comp_type: Mapped[str] = mapped_column(String(20), nullable=False)
-    capacity: Mapped[int] = mapped_column(default=50)
+    capacity: Mapped[int] = mapped_column(default=25)
 
     train: Mapped["Train"] = relationship(back_populates="compartments")
     seats: Mapped[list["Seat"]] = relationship(back_populates="compartment")

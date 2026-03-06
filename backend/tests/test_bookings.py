@@ -26,7 +26,7 @@ async def _get_schedule_and_seat(db_session: AsyncSession, schedule_offset=2, se
 async def test_happy_path_reserve_pay_confirm(
     client: AsyncClient, auth_headers: dict, db_session: AsyncSession
 ):
-    schedule, seat = await _get_schedule_and_seat(db_session, schedule_offset=2, seat_offset=100)
+    schedule, seat = await _get_schedule_and_seat(db_session, schedule_offset=2, seat_offset=10)
 
     # Reserve
     resp = await client.post(
@@ -58,7 +58,7 @@ async def test_happy_path_reserve_pay_confirm(
 async def test_list_user_bookings(
     client: AsyncClient, auth_headers: dict, db_session: AsyncSession
 ):
-    schedule, seat = await _get_schedule_and_seat(db_session, schedule_offset=3, seat_offset=101)
+    schedule, seat = await _get_schedule_and_seat(db_session, schedule_offset=3, seat_offset=11)
 
     resp = await client.post(
         "/bookings",

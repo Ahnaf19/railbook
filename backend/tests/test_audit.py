@@ -27,7 +27,7 @@ async def _get_schedule_seat(db_session, schedule_offset, seat_offset):
 async def test_reserve_creates_audit_entry(
     client: AsyncClient, auth_headers: dict, db_session: AsyncSession
 ):
-    schedule, seat = await _get_schedule_seat(db_session, schedule_offset=10, seat_offset=140)
+    schedule, seat = await _get_schedule_seat(db_session, schedule_offset=10, seat_offset=35)
 
     resp = await client.post(
         "/bookings",
@@ -54,7 +54,7 @@ async def test_reserve_creates_audit_entry(
 async def test_payment_success_creates_entries(
     client: AsyncClient, auth_headers: dict, db_session: AsyncSession
 ):
-    schedule, seat = await _get_schedule_seat(db_session, schedule_offset=11, seat_offset=141)
+    schedule, seat = await _get_schedule_seat(db_session, schedule_offset=11, seat_offset=36)
     payment_gateway.failure_rate = 0.0
     payment_gateway.latency_ms = 10
 
@@ -92,7 +92,7 @@ async def test_payment_success_creates_entries(
 async def test_payment_failure_creates_entries(
     client: AsyncClient, auth_headers: dict, db_session: AsyncSession
 ):
-    schedule, seat = await _get_schedule_seat(db_session, schedule_offset=12, seat_offset=142)
+    schedule, seat = await _get_schedule_seat(db_session, schedule_offset=12, seat_offset=37)
 
     resp = await client.post(
         "/bookings",
@@ -129,7 +129,7 @@ async def test_payment_failure_creates_entries(
 async def test_refund_creates_audit_entry(
     client: AsyncClient, auth_headers: dict, db_session: AsyncSession
 ):
-    schedule, seat = await _get_schedule_seat(db_session, schedule_offset=13, seat_offset=143)
+    schedule, seat = await _get_schedule_seat(db_session, schedule_offset=13, seat_offset=38)
     payment_gateway.failure_rate = 0.0
     payment_gateway.latency_ms = 10
 
@@ -165,7 +165,7 @@ async def test_refund_creates_audit_entry(
 async def test_entries_are_chronological(
     client: AsyncClient, auth_headers: dict, db_session: AsyncSession
 ):
-    schedule, seat = await _get_schedule_seat(db_session, schedule_offset=14, seat_offset=144)
+    schedule, seat = await _get_schedule_seat(db_session, schedule_offset=14, seat_offset=39)
     payment_gateway.failure_rate = 0.0
     payment_gateway.latency_ms = 10
 

@@ -15,8 +15,8 @@ TRAINS = [
     ("Mohanagar Provati", "MP-301", "Dhaka", "Sylhet"),
 ]
 
-COMPARTMENTS = ["A", "B", "C", "D", "E"]
-COMP_TYPES = {"A": "ac", "B": "ac", "C": "non_ac", "D": "non_ac", "E": "non_ac"}
+COMPARTMENTS = ["A", "B"]
+COMP_TYPES = {"A": "ac", "B": "non_ac"}
 
 DEPARTURE_HOURS = {
     "SE-701": (7, 0),
@@ -78,12 +78,12 @@ async def seed_database(session: AsyncSession) -> None:
                 train_id=train.id,
                 name=comp_name,
                 comp_type=COMP_TYPES[comp_name],
-                capacity=50,
+                capacity=25,
             )
             session.add(comp)
             await session.flush()
 
-            for seat_num in range(1, 51):
+            for seat_num in range(1, 26):
                 seat = Seat(
                     compartment_id=comp.id,
                     seat_number=seat_num,

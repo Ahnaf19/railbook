@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.audit.service import log_audit
-from app.models import Booking, Compartment, Payment, Schedule, Seat
+from app.models import Booking, Compartment, Payment, Schedule, Seat, Train
 from app.payments.gateway import PaymentResult, payment_gateway
 
 
@@ -269,6 +269,36 @@ async def refund_booking(
     await session.commit()
     await _invalidate_seat_cache(booking.schedule_id)
     return booking
+
+
+async def enrich_booking(session: AsyncSession, booking: Booking) -> dict:
+    """Add train/seat details to a booking for API responses."""
+    schedule = await session.get(Schedule, booking.schedule_id)
+    train = await session.get(Train, schedule.train_id)
+    seat = await session.get(Seat, booking.seat_id)
+    compartment = await session.get(Compartment, seat.compartment_id)
+    return {
+        "id": booking.id,
+        "user_id": booking.user_id,
+        "schedule_id": booking.schedule_id,
+        "seat_id": booking.seat_id,
+        "status": booking.status,
+        "total_amount": booking.total_amount,
+        "reserved_at": booking.reserved_at,
+        "expires_at": booking.expires_at,
+        "confirmed_at": booking.confirmed_at,
+        "cancelled_at": booking.cancelled_at,
+        "idempotency_key": booking.idempotency_key,
+        "train_name": train.name,
+        "train_number": train.train_number,
+        "origin": train.origin,
+        "destination": train.destination,
+        "compartment_name": compartment.name,
+        "comp_type": compartment.comp_type,
+        "seat_number": seat.seat_number,
+        "departure_time": schedule.departure_time,
+        "arrival_time": schedule.arrival_time,
+    }
 
 
 async def list_user_bookings(

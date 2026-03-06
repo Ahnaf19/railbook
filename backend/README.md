@@ -31,7 +31,7 @@ app/
   config.py           # Pydantic Settings from env vars / .env
   database.py         # AsyncEngine + session factory (pool_size=10)
   models.py           # 8 SQLAlchemy models (User, Train, Schedule, Compartment, Seat, Booking, Payment, AuditTrail)
-  seed.py             # Idempotent seed: 3 trains, 5 compartments each, 50 seats per compartment, 7 days of schedules
+  seed.py             # Idempotent seed: 3 trains, 2 compartments each, 25 seats per compartment, 7 days of schedules
   redis.py            # Redis connection pool for rate limiting
   auth/               # JWT register/login/refresh, bcrypt passwords, role-based deps
   trains/             # Train listing, schedule filtering (future only), seat availability with booking status

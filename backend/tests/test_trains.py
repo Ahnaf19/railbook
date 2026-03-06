@@ -36,8 +36,8 @@ async def test_seat_availability(client: AsyncClient, db_session: AsyncSession, 
     resp = await client.get(f"/trains/schedules/{schedule.id}/seats")
     assert resp.status_code == 200
     data = resp.json()
-    assert data["total_seats"] == 250  # 5 compartments x 50 seats
-    assert data["available_seats"] == 250  # No bookings yet
+    assert data["total_seats"] == 50  # 2 compartments x 25 seats
+    assert data["available_seats"] == 50  # No bookings yet
 
 
 async def test_seat_shows_booked_after_booking(client: AsyncClient, db_session: AsyncSession):
@@ -52,7 +52,7 @@ async def test_seat_shows_booked_after_booking(client: AsyncClient, db_session: 
         select(Seat)
         .join(Compartment, Seat.compartment_id == Compartment.id)
         .where(Compartment.train_id == schedule.train_id)
-        .offset(200)
+        .offset(40)
         .limit(1)
     )
     seat = result.scalar_one()

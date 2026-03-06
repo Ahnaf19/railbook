@@ -19,7 +19,7 @@ backend/app/           → FastAPI application
   config.py            → Pydantic Settings (env vars)
   database.py          → AsyncEngine, async_sessionmaker, get_db dependency
   models.py            → 8 SQLAlchemy ORM models (User, Train, Schedule, Compartment, Seat, Booking, Payment, AuditTrail)
-  seed.py              → Idempotent seed data (3 trains, 750 seats, 3 users)
+  seed.py              → Idempotent seed data (3 trains, 150 seats, 3 users)
   auth/                → JWT auth (register, login, refresh, me)
   trains/              → Train listing, schedules, seat availability + Redis cache
   bookings/            → Core booking engine (SELECT FOR UPDATE), cleanup task
@@ -99,7 +99,7 @@ Each backend module follows: `router.py` (HTTP layer, depends) → `service.py` 
 - **Booking statuses**: reserved → confirmed → refunded, or reserved → cancelled
 - **Migrations**: Alembic async, config in `alembic.ini`, env in `migrations/env.py`
 - **Test DB**: `railbook_test` (derived from DATABASE_URL by replacing DB name)
-- **Seed data**: 3 trains × 5 compartments × 50 seats = 750 seats, schedules for next 7 days, 3 users (admin/alice/bob)
+- **Seed data**: 3 trains × 2 compartments × 25 seats = 150 seats, schedules for next 7 days, 3 users (admin/alice/bob)
 
 ## Environment Variables
 
