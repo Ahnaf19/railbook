@@ -40,5 +40,8 @@ htmlcov/
 node_modules/
 frontend/dist/
 
+# Claude Code (local settings are user-specific)
+.claude/settings.local.json
+
 # Misc
 *.log
