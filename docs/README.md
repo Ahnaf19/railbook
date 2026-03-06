@@ -26,6 +26,10 @@ This directory contains all project documentation for RailBook. Each subdirector
 
 - **[Postman Collection](postman/)** -- Importable Postman collection and environment for interactive API testing. See `postman/README.md` for usage instructions.
 
+### Diagrams
+
+- **[Mermaid Diagrams](DIAGRAMS.md)** -- 8 rendered diagrams covering system architecture, booking state machine, ER schema, race condition sequences, payment flow, rate limiting, cleanup task, and test coverage map. Can be pasted into Excalidraw or any Mermaid renderer.
+
 ### Other Files
 
 - **[railbook-plan.md](railbook-plan.md)** -- Original project planning document.

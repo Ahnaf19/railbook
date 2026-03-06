@@ -21,6 +21,8 @@ RailBook is a full-stack ticket booking system that deliberately confronts these
 
 ---
 
+<a id="features"></a>
+
 ## Features
 
 - **Race-condition-proof booking** — `SELECT FOR UPDATE` ensures exactly one winner when two users grab the same seat
@@ -32,6 +34,8 @@ RailBook is a full-stack ticket booking system that deliberately confronts these
 - **Visual seat map** — color-coded grid across 5 compartments (AC/Non-AC), 250 seats per train
 
 ---
+
+<a id="quick-start"></a>
 
 ## Quick Start
 
@@ -96,72 +100,83 @@ curl http://localhost:8000/health
 
 ---
 
+<a id="architecture"></a>
+
 ## Architecture
 
 ```mermaid
 graph TB
-    subgraph Client
-        UI["React 18 + Vite<br/><i>Seat grid, booking flow, demo page</i>"]
+    subgraph Client["Frontend — React 18 + Vite"]
+        UI_TRAINS["Train Browser<br/>schedules, seat grid"]
+        UI_BOOK["Booking Flow<br/>reserve → pay → ticket"]
+        UI_DEMO["Concurrency Demo<br/>Alice vs Bob split-screen"]
+        UI_ADMIN["Admin Dashboard<br/>stats, occupancy, audit"]
     end
 
-    subgraph Backend["FastAPI (async)"]
-        AUTH[Auth<br/>JWT + bcrypt]
-        TRAINS[Trains<br/>Schedules, seats]
-        BOOK[Booking Engine<br/>SELECT FOR UPDATE]
-        PAY[Payment Gateway<br/>Mock, configurable]
-        AUDIT[Audit Trail<br/>Atomic logging]
-        RL[Rate Limiter<br/>Sliding window]
-        DEMO[Demo<br/>Race condition]
-        ADMIN[Admin<br/>Stats, occupancy]
-        CLEANUP[Cleanup Task<br/>SKIP LOCKED]
+    subgraph API["Backend — FastAPI (fully async)"]
+        AUTH["Auth Module<br/>register, login, refresh, me<br/><i>JWT + bcrypt</i>"]
+        TRAINS["Trains Module<br/>list trains, schedules<br/>seat availability"]
+        BOOKING["Booking Engine<br/>reserve, pay, refund<br/><i>SELECT FOR UPDATE</i>"]
+        PAYMENT["Payment Gateway<br/>mock, configurable<br/><i>idempotent charges</i>"]
+        AUDIT["Audit Service<br/>atomic in-transaction<br/><i>append-only log</i>"]
+        RATELIMIT["Rate Limiter<br/>sliding window<br/><i>sorted sets</i>"]
+        DEMO["Demo Service<br/>asyncio.gather race"]
+        ADMIN["Admin Service<br/>stats, occupancy"]
+        CLEANUP["Cleanup Task<br/>60s interval<br/><i>SKIP LOCKED</i>"]
     end
 
-    subgraph Data
-        PG[("PostgreSQL 16<br/>8 tables, row-level locks")]
-        RD[("Redis 7<br/>Rate limits + seat cache")]
+    subgraph Data["Data Layer"]
+        PG[("PostgreSQL 16<br/>8 tables<br/>row-level locks<br/>ACID transactions")]
+        REDIS[("Redis 7<br/>seat cache (5s TTL)<br/>rate limit counters")]
     end
 
-    UI -->|HTTP + JWT| AUTH
-    UI -->|REST| TRAINS
-    UI -->|REST| BOOK
-    UI -->|REST| DEMO
-    UI -->|REST| ADMIN
+    UI_TRAINS -->|"GET /trains/**"| TRAINS
+    UI_BOOK -->|"POST /bookings/**"| BOOKING
+    UI_DEMO -->|"POST /demo/race-condition"| DEMO
+    UI_ADMIN -->|"GET /admin/**"| ADMIN
+    Client -->|"POST /auth/**"| AUTH
 
     AUTH --> PG
     TRAINS --> PG
-    TRAINS --> RD
-    BOOK --> PG
-    BOOK --> PAY
-    BOOK --> AUDIT
-    RL --> RD
+    TRAINS -.->|"cache read/write"| REDIS
+    BOOKING --> PG
+    BOOKING --> PAYMENT
+    BOOKING --> AUDIT
+    RATELIMIT -.->|"sorted set ops"| REDIS
     CLEANUP --> PG
     CLEANUP --> AUDIT
+    DEMO --> BOOKING
     ADMIN --> PG
+
+    style PG fill:#336791,color:#fff,stroke:#1e3a5f
+    style REDIS fill:#dc382d,color:#fff,stroke:#a12a23
+    style BOOKING fill:#2b6cb0,color:#fff,stroke:#1e4e8c
+    style CLEANUP fill:#744210,color:#fff,stroke:#5a3510
+    style AUDIT fill:#276749,color:#fff,stroke:#1a4731
 ```
 
 ### Booking state machine
 
-```
-                  ┌──────────┐
-                  │ reserved │  (5-min TTL)
-                  └────┬─────┘
-                       │
-            ┌──────────┼──────────┐
-            │                     │
-     pay succeeds          expires / pay fails
-            │                     │
-    ┌───────▼───────┐    ┌───────▼────────┐
-    │   confirmed   │    │   cancelled    │
-    └───────┬───────┘    └────────────────┘
-            │
-      refund (>1hr before departure)
-            │
-    ┌───────▼───────┐
-    │   refunded    │
-    └───────────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> reserved : POST /bookings
+
+    reserved --> confirmed : Payment succeeds
+    reserved --> cancelled : Payment fails
+    reserved --> cancelled : Reservation expires (5min)
+
+    confirmed --> refunded : Refund requested
 ```
 
-Every arrow is a single database transaction that atomically updates `bookings.status` and inserts an `audit_trail` entry.
+| Transition | Trigger | Atomic commit includes |
+|---|---|---|
+| `[*]` → `reserved` | `POST /bookings` | Booking row + audit entry |
+| `reserved` → `confirmed` | `POST /bookings/:id/pay` (charge succeeds) | Booking status + Payment(success) + audit |
+| `reserved` → `cancelled` | `POST /bookings/:id/pay` (charge fails) | Booking status + Payment(failed) + audit |
+| `reserved` → `cancelled` | Cleanup task (expires_at < now) | Booking status + audit (SYSTEM_USER_ID) |
+| `confirmed` → `refunded` | `POST /bookings/:id/refund` | Booking status + gateway.refund() + audit |
+
+Every transition is a single database transaction that atomically updates `bookings.status` and inserts an `audit_trail` entry.
 
 ---
 
@@ -180,6 +195,8 @@ Every arrow is a single database transaction that atomically updates `bookings.s
 
 ---
 
+<a id="concurrency-deep-dive"></a>
+
 ## Concurrency Deep Dive
 
 This is the core of the project. Five real concurrency problems, five tested solutions.
@@ -191,6 +208,42 @@ This is the core of the project. Five real concurrency problems, five tested sol
 | 3 | **Duplicate operations** | Network timeout → client retries → user charged twice | Unique `idempotency_key` on bookings and payments; retry returns original result | UNIQUE constraint + early return |
 | 4 | **Stale reservations** | User reserves seat, never pays — seat locked forever | 5-minute TTL + background cleanup task using `SKIP LOCKED` to avoid blocking active payments | Advisory skip with `FOR UPDATE SKIP LOCKED` |
 | 5 | **Payment atomicity** | Payment succeeds at gateway but app crashes before DB write | Booking status + Payment record + Audit entry written in a single `session.commit()` | ACID transaction (all-or-nothing) |
+
+Here's what happens when Alice and Bob click "Book" on seat A3 at the same millisecond:
+
+```mermaid
+sequenceDiagram
+    actor Alice
+    actor Bob
+    participant API as FastAPI
+    participant DB as PostgreSQL
+
+    Note over Alice, Bob: Both click "Book" on seat A3 at the same time
+
+    Alice->>API: POST /bookings {seat: A3, key: uuid-1}
+    Bob->>API: POST /bookings {seat: A3, key: uuid-2}
+
+    API->>DB: BEGIN (Alice's txn)
+    API->>DB: BEGIN (Bob's txn)
+
+    API->>DB: SELECT ... WHERE seat=A3 FOR UPDATE (Alice)
+    Note over DB: Alice acquires row lock
+
+    API->>DB: SELECT ... WHERE seat=A3 FOR UPDATE (Bob)
+    Note over DB: Bob BLOCKS — waiting for Alice's lock
+
+    API->>DB: INSERT booking (Alice)
+    API->>DB: INSERT audit_trail (Alice)
+    API->>DB: COMMIT (Alice)
+    Note over DB: Lock released
+
+    API-->>Alice: 201 Created ✓
+
+    Note over DB: Bob's SELECT unblocks<br/>Finds Alice's committed booking
+    API-->>Bob: 409 Conflict ✗
+
+    API->>DB: ROLLBACK (Bob)
+```
 
 Every solution has a corresponding test that uses `asyncio.gather` against the real database — not mocked:
 
@@ -204,9 +257,11 @@ statuses = sorted([r.status_code for r in results])
 assert statuses == [201, 409]  # Exactly one wins
 ```
 
-Read the full analysis: [Concurrency Handling →](docs/architecture/CONCURRENCY.md)
+Read the full analysis: [Concurrency Handling →](docs/architecture/CONCURRENCY.md) | [All diagrams →](docs/DIAGRAMS.md)
 
 ---
+
+<a id="api-endpoints"></a>
 
 ## API Endpoints
 
@@ -324,6 +379,8 @@ railbook/
 
 ---
 
+<a id="documentation"></a>
+
 ## Documentation
 
 | Document | Description |
@@ -337,9 +394,12 @@ railbook/
 | [User Guide](docs/guides/USER_GUIDE.md) | End-user walkthrough of the application |
 | [Deployment Guide](docs/guides/DEPLOYMENT_GUIDE.md) | Docker deployment, env vars, production hardening |
 | [Load Testing Guide](docs/guides/LOAD_TESTING_GUIDE.md) | Locust personas, integrity verification, interpreting results |
+| [Diagrams](docs/DIAGRAMS.md) | 8 Mermaid diagrams: architecture, state machine, ER, sequences, flows |
 | [Postman Collection](docs/postman/) | Importable collection with auto-token management |
 
 ---
+
+<a id="contributing"></a>
 
 ## Contributing
 
